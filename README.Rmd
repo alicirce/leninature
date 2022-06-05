@@ -1,0 +1,45 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# leninature
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of this package is to make it easy to query and analyse the
+works of Lenin. 
+
+# Getting started
+
+If you would like to use the tidy data in the format provided, simply install
+this package from github using devtools:
+
+```{r eval=FALSE}
+devtools::install_github("alicirce/leninature")
+```
+
+If you would like to run the data compilation scripts yourself from scratch, you
+will need to download the texts from the Marxists Internet Archive (MIA). MIA
+provides instructions for (respectfully) downloading portions of their archives
+in their [FAQ](https://www.marxists.org/admin/janitor/faq.htm#hdd).
+
+The scripts in `data-raw` assume you have already run the following scripts. 
+You will also need to have your working directory appropriately set.
+
+```{bash eval=FALSE}
+mkdir lenin
+cd lenin
+wget -mpnp -nH -N -t 3 -w .5 https://www.marxists.org/archive/lenin/by-title.htm
+```
+
+This took me about 2.5 hours to pull.
