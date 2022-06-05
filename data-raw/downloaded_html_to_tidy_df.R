@@ -10,9 +10,9 @@ library(rvest)
 #------------------------------------------------------------------------------
 # This function takes a file path as an argument and returns a data frame
 # containing a column for the file path, for the HTML class of the text (usually
-# not available, but could be useful in some analysis), and the text. Each row
-# corresponds approximately to a paragraph, but depends on how the document was
-# marked up.
+# not available, but could be useful in some analysis -- for example,
+# salutations and quotes are annotated), and the text. Each row corresponds
+# approximately to a paragraph, but depends on how the document was marked up.
 
 parse_page <- function(fp) {
   page <- read_html(fp)
@@ -61,13 +61,18 @@ tidy_parsed_html <- function(pages) {
       # remove annotations
       text = gsub("\\[[0-9]+\\]", "", text),
       # fix HTML parsing empty strings
-      text_annotation = ifelse(
-        text_annotation == "character(0)",
-        NA,
-        text_annotation
+      text_annotation = case_when(
+        text_annotation == "character(0)" ~ NA_character_, # nothing
+        grepl(" ", text_annotation)       ~ NA_character_, # just CSS
+        TRUE                   ~ text_annotation # neat labels
       ),
+      # tidy up titles for nicer aesthetics
+      # remove anything with numbers in between square brackets
+      title = tools::toTitleCase(tolower(gsub("\\[[0-9]*\\]", "", title))),
       # add year
-      year = gsub(".*/([0-9]{4})/.*", "\\1", url)
+      year = gsub(".*/([0-9]{4})/.*", "\\1", url),
+      # make url more generic
+      url = gsub("../mia/lenin/archive/lenin/", "", url, fixed = TRUE)
     )
 }
 
