@@ -38,7 +38,9 @@ cd lenin
 wget -mpnp -nH -N -t 3 -w .5 https://www.marxists.org/archive/lenin/by-title.htm
 ```
 
-This took me about 2.5 hours to pull.
+This took me about 2.5 hours to pull, but others have reported it taking
+substantially longer. If your command is interrupted, you can restart it
+again.
 
 ## I don’t want to use R
 
