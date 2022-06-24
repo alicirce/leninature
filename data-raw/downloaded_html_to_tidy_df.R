@@ -112,4 +112,15 @@ lenin <- bind_rows(all_pages) %>%
   tidy_parsed_html() %>%
   filter(nchar(text) >= 2)
 
+# bespoke data-cleaning...
+lenin <- lenin %>%
+  mutate(
+    title = ifelse(
+      grepl("/cons-logic/", url),
+      "Conspectus of Hegel’s book 'The Science of Logic'",
+      title
+    )
+  )
+
+
 usethis::use_data(lenin, overwrite = TRUE)
