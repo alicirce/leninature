@@ -58,6 +58,8 @@ tidy_parsed_html <- function(pages) {
       # fix white space issues
       text = gsub("\t|\n", " ", text),
       text = gsub(" ( )+", " ", text),
+      title = gsub("\t|\n", " ", title),
+      title = gsub(" ( )+", " ", title),
       # remove annotations
       text = gsub("\\[[0-9]+\\]", "", text),
       # fix HTML parsing empty strings
@@ -115,11 +117,20 @@ lenin <- bind_rows(all_pages) %>%
 # bespoke data-cleaning...
 lenin <- lenin %>%
   mutate(
-    title = ifelse(
-      grepl("/cons-logic/", url),
-      "Conspectus of Hegel’s book 'The Science of Logic'",
-      title
+    title = case_when(
+      grepl("/cons-logic/", url) ~
+        "Conspectus of Hegel’s book 'The Science of Logic'",
+      grepl("/witbd/", url) ~
+        "What is to be Done?",
+      grepl("/ni-eta/", url) ~
+        "Notebook 'η'",
+      grepl("/ni-zeta/", url) ~
+        "Notebook 'ζ'",
+      TRUE                  ~ title
     )
+  ) %>%
+  mutate(
+    year = as.integer(year)
   )
 
 
