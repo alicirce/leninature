@@ -151,6 +151,11 @@ lenin %>%
 
 ```
 
+Here are a couple of fun and quick peeks into the data. You can view the code
+that went into making these graphs and tables 
+[here](https://github.com/alicirce/leninature/blob/main/vignettes/leninature.Rmd).
+You can also read additional documentation about this data set in `?lenin`.
+
 ## Books
 Lenin's longest work is "Materialism and Empirio-Criticism", a philosophical 
 text arguing against Mach and other idealists who claim the world had no
@@ -332,7 +337,7 @@ It's interesting that "Salut, Lenin" made it into the top 5. Russia and France
 had close political ties, and in the 18th and 19th century it was fashionable
 for the nobility to converse in French. The class-based language barriers and
 trendy use of French feature in Tolstoy's *Anna Karenina* and Chernychevsky's
-*What is to be Done?*. Lenin also discusses it in his 
+*What is to be Done?*. Stalin also discusses it in his 
 [essay on linguistics](https://www.marxists.org/reference/archive/stalin/works/1950/jun/20.htm):
 
 > There was a time when Russian aristocrats at the tsar's court and in high
