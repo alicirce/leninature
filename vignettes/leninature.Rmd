@@ -38,6 +38,8 @@ library(stringr)
 The Marxists Internet Archive has an extensive collection of Lenin's works,
 ranging from books like [What Is To Be Done?](https://www.marxists.org/archive/lenin/works/1901/witbd/index.htm) to
 [notes scribbled on printed documents](https://www.marxists.org/archive/lenin/works/1912/nov/00sd.htm).
+This package makes these works available in a (mostly) tidy data frame, `lenin`.
+
 The works span from 1893 to 1923 (Lenin died in early 1924), although the
 majority of his writing is from the founding of the Bolshevik party (1903) and
 on-wards. Perhaps unsurprisingly, the year of the February and October
@@ -55,16 +57,6 @@ select_works <- data.frame(
     "What\nis to be\ndone?",
     "State\n&\nRev",
     "Materialism &\nEmpirio criticism"
-  ),
-  lab_x = c(
-    1902.5, 
-    1916, 
-    1906.2
-  ),
-  lab_y = c(
-    70, 
-    50, 
-    165
   )
 )
 
@@ -75,7 +67,7 @@ select_works_words <- lenin %>%
     nw = str_count(text, "\\S+"),
     year = as.numeric(year),
   ) %>%
-  group_by(name, abbrev, lab_x, lab_y, year) %>%
+  group_by(name, abbrev, year) %>%
   summarize(words = sum(nw)/1000)
 
 
@@ -235,7 +227,7 @@ letters %>%
   ) +
   labs(
     title = "Penpals",
-    subtitle = "Lenin's most frequent letter addressees\n",
+    subtitle = "Lenin's most frequent letter addressees",
     x = "number of letters"
   )
 
@@ -286,7 +278,7 @@ lenin %>%
   ) +
   labs(
     title = "Dear Comrade",
-    subtitle = "Lenin's most common salutations\n",
+    subtitle = "Lenin's most common salutations",
     x = "number of letters"
   )
   
@@ -330,7 +322,7 @@ lenin %>%
   ) +
   labs(
     title = "Yours, Lenin",
-    subtitle = "Lenin's favourite ways to sign a letter\n",
+    subtitle = "Lenin's favourite ways to sign a letter",
     x = "number of letters"
   )
   
