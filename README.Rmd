@@ -11,6 +11,12 @@ knitr::opts_chunk$set(
 )
 ```
 
+::: {.floatting}
+
+```{r echo=FALSE, out.extra='style="float:right; padding:10px"'}
+knitr::include_graphics("man/figures/leninsticker_tiny.png")
+```
+
 # leninature
 
 <!-- badges: start -->
@@ -18,7 +24,7 @@ knitr::opts_chunk$set(
 
 The goal of this package is to make it easy to query and analyse the
 works of Lenin. 
-
+:::
 # Getting started
 
 ## The Easy Way
