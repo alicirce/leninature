@@ -1,19 +1,13 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-<div class="floating">
-
-<img src="man/figures/leninsticker_tiny.png" width="150" style="float:right; padding:10px" />
-
-# leninature
+# leninature <img src='man/figures/leninsticker_tiny.png' align="right"/>
 
 <!-- badges: start -->
 <!-- badges: end -->
 
 The goal of this package is to make it easy to query and analyse the
 works of Lenin.
-
-</div>
 
 # Getting started
 
