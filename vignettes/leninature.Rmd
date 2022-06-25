@@ -35,6 +35,7 @@ library(ggtext)
 library(stringr)
 ```
 
+<img src='../man/figures/leninsticker_tiny.png' align="right"/>
 The Marxists Internet Archive has an extensive collection of Lenin's works,
 ranging from books like [What Is To Be Done?](https://www.marxists.org/archive/lenin/works/1901/witbd/index.htm) to
 [notes scribbled on printed documents](https://www.marxists.org/archive/lenin/works/1912/nov/00sd.htm).
