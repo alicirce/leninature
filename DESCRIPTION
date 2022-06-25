@@ -13,6 +13,9 @@ Depends:
     R (>= 2.10)
 LazyData: true
 Suggests: 
+    dplyr,
+    ggplot2,
+    ggtext,
     hexSticker,
     knitr,
     magick,

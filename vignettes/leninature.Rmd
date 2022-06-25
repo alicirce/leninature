@@ -1,0 +1,351 @@
+---
+title: "leninature"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{leninature}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  echo = FALSE,
+  fig.align = "center"
+)
+```
+
+```{css}
+img {
+  border: 0px;
+}
+p.caption {
+  font-size: 0.8em;
+}
+```
+
+```{r setup}
+library(leninature)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(ggtext)
+library(stringr)
+```
+
+The Marxists Internet Archive has an extensive collection of Lenin's works,
+ranging from books like [What Is To Be Done?](https://www.marxists.org/archive/lenin/works/1901/witbd/index.htm) to
+[notes scribbled on printed documents](https://www.marxists.org/archive/lenin/works/1912/nov/00sd.htm).
+The works span from 1893 to 1923 (Lenin died in early 1924), although the
+majority of his writing is from the founding of the Bolshevik party (1903) and
+on-wards. Perhaps unsurprisingly, the year of the February and October
+Revolutions were marked by a particular flurry of writing.
+
+```{r annotate_works_of_interest}
+
+select_works <- data.frame(
+  abbrev = c(
+    "witbd", 
+    "staterev", 
+    "mec"
+  ),
+  name = c(
+    "What\nis to be\ndone?",
+    "State\n&\nRev",
+    "Materialism &\nEmpirio criticism"
+  ),
+  lab_x = c(
+    1902.5, 
+    1916, 
+    1906.2
+  ),
+  lab_y = c(
+    70, 
+    50, 
+    165
+  )
+)
+
+select_works_words <- lenin %>%
+  mutate(abbrev = gsub(".*[0-9]/(.*)/.*", "\\1", url)) %>%
+  inner_join(select_works) %>%
+  mutate(
+    nw = str_count(text, "\\S+"),
+    year = as.numeric(year),
+  ) %>%
+  group_by(name, abbrev, lab_x, lab_y, year) %>%
+  summarize(words = sum(nw)/1000)
+
+
+```
+
+
+```{r with_books,fig.height=4,fig.width=6}
+
+lenin %>%
+  mutate(
+    nc = nchar(text),
+    nw = str_count(text, "\\S+")
+  ) %>%
+  group_by(year) %>%
+  summarize(
+    documents = n_distinct(url),
+    paras = n(),
+    chars = sum(nc),
+    words = sum(nw)/1000
+  ) %>%
+  pivot_longer(-year, names_to = "count_type", values_to = "count") %>%
+  filter(count_type == "words") %>%
+  ggplot() +
+  aes(x = year, y = count) +
+  geom_hline(yintercept = 0, color = "grey50") +
+  geom_bar( 
+    stat = "identity",
+    #fill = "grey70",
+    aes(fill = year == 1917),
+    width = 0.5
+  ) +
+  annotate(
+    "text",
+    x = 1917, y = 550,
+    size = 2.9,
+    label = "October\nRevolution",
+    color = "red"
+  ) +
+  geom_bar(
+    data = filter(select_works_words, year !=1917),
+    aes(x = year, y = words),
+    stat = 'identity',
+    width = 0.5
+  ) +
+  geom_bar(
+    data = filter(select_works_words, year ==1917),
+    aes(x = year, y = words),
+    stat = 'identity',
+    width = 0.5,
+    fill = "#b21326"
+  ) +
+  geom_textbox(
+    data = select_works_words,
+    aes(x = year, y = words, label = name),
+    vjust = -0.1,
+    size = 2.9,
+    maxwidth = unit(0.6, "inches"),
+    box.color = NA,
+    alpha = 0.65,
+    halign = 0.5
+  ) +
+  theme_void() +
+  theme(
+    legend.position = "none",
+    strip.background = element_blank(),
+    axis.text = element_text(color = 'grey30', size = 8),
+    panel.grid.major.y = element_line(color = "grey90"),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 10, color = "#f20707", face = "bold"),
+    plot.subtitle = element_text(size = 9, color = "grey30")
+  ) +
+  labs(
+    title = "Lenin's Writing",
+    subtitle = "Words per year (in thousands), including selected works"
+  ) +
+  scale_y_continuous(expand = c(0.05, 0.05, 0.15, 0.15)) +
+  scale_fill_manual(
+    values = c("grey70", "#f75d6f")
+  )
+
+```
+
+## Books
+Lenin's longest work is "Materialism and Empirio-Criticism", a philosophical 
+text arguing against Mach and other idealists who claim the world had no
+objective real existence outside human perception. It's over three times as
+long as his perhaps more famous "The State and Revolution", in which he argues
+for the need to remove the old institutions of the bourgeois state through
+revolution in order to bring about a social structure without class.
+```{r }
+lenin %>%
+  mutate(nw = str_count(text, "\\S+")) %>%
+  filter(!is.na(title)) %>%
+  group_by(year, title) %>% 
+  summarize(`number of words` = sum(nw)) %>%
+  ungroup() %>%
+  arrange(desc(`number of words`)) %>%
+  slice(1:10) %>%
+  knitr::kable()
+
+```
+## Letters
+
+The Marxists Internet Archive's collection also includes an extensive number of
+letters from Lenin to friends and colleagues. His most frequent correspondents
+included his mother and early Bolsheviks Zinoviev, Kamenev, Gorbunov, and
+Armand.
+
+```{r fig.width=4, fig.height=3}
+
+
+letter_parts <- c( "closing", "salutation")
+
+letters <- lenin %>%
+  group_by(url) %>%
+  filter(
+    sum(text_annotation %in% letter_parts) > 0 || 
+      grepl("To:", title) ||
+      title == "Addressee Unidentified"
+    )
+
+letters %>%
+  mutate(addressee = trimws(gsub("To:", "", title))) %>%
+  select(url, addressee) %>%
+  distinct() %>%
+  group_by(addressee) %>%
+  tally() %>%
+  arrange(desc(n)) %>%
+  slice(1:5) %>%
+  ggplot() +
+  aes(x = n, y = reorder(addressee, n)) +
+  geom_point() +
+  geom_segment(aes(xend = 0, yend = addressee)) +
+  geom_label(
+    aes(x = 0, label = addressee),
+    fill = "white",
+    label.size = NA,
+    label.padding = unit(0, "cm"),
+    hjust = 0,
+    nudge_x = 1.5,
+    size = 3.2
+  ) +
+  theme_classic() +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.ticks.x = element_line(color = "black"),
+    axis.line.y = element_line(size = 0.4),
+    axis.title.y = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 10, color = "#f20707", face = "bold"),
+    plot.subtitle = element_text(size = 9, color = "grey30")
+  ) +
+  scale_x_continuous(
+    expand = c(0, 0, 0.01, 0.01),
+    breaks = seq(25, 100, 25)
+  ) +
+  labs(
+    title = "Penpals",
+    subtitle = "Lenin's most frequent letter addressees\n",
+    x = "number of letters"
+  )
+
+```
+The most common way Lenin started his letters was with the salutation "Dear
+Comrade." The most common way he ended his letters was with the close "Yours,
+V.U." 
+
+```{r fig.width=4, fig.height=3}
+
+
+lenin %>%
+  filter(text_annotation %in% letter_parts[2]) %>%
+  mutate(text = trimws(text)) %>%
+  group_by(text_annotation, text) %>%
+  tally() %>%
+  arrange(desc(n)) %>%
+  ungroup() %>%
+  group_by(text_annotation) %>%
+  slice(1:5) %>%
+  ggplot() +
+  aes(x = n, y = reorder(text, n)) +
+  geom_point() +
+  geom_segment(aes(xend = 0, yend = text)) +
+  geom_label(
+    aes(x = 0, label = text),
+    fill = "white",
+    label.size = NA,
+    label.padding = unit(0, "cm"),
+    hjust = 0,
+    nudge_x = 1.5,
+    size = 3.2
+  ) +
+  theme_classic() +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.ticks.x = element_line(color = "black"),
+    axis.line.y = element_line(size = 0.4),
+    axis.title.y = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 10, color = "#f20707", face = "bold"),
+    plot.subtitle = element_text(size = 9, color = "grey30")
+  ) +
+  scale_x_continuous(
+    expand = c(0, 0, 0.01, 0.01),
+    breaks = seq(25, 100, 25)
+  ) +
+  labs(
+    title = "Dear Comrade",
+    subtitle = "Lenin's most common salutations\n",
+    x = "number of letters"
+  )
+  
+lenin %>%
+  filter(text_annotation %in% letter_parts[1]) %>%
+  mutate(text = trimws(text)) %>%
+  group_by(text_annotation, text) %>%
+  tally() %>%
+  arrange(desc(n)) %>%
+  ungroup() %>%
+  group_by(text_annotation) %>%
+  slice(1:5) %>%
+  mutate(text = gsub(" Yours", "\nYours", text)) %>%
+  ggplot() +
+  aes(x = n, y = reorder(text, n)) +
+  geom_point() +
+  geom_segment(aes(xend = 0, yend = text)) +
+  geom_label(
+    aes(x = 0, label = text),
+    fill = "white",
+    label.size = NA,
+    label.padding = unit(0, "cm"),
+    hjust = 0,
+    nudge_x = 1.5,
+    size = 3.2
+  ) +
+  theme_classic() +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.ticks.x = element_line(color = "black"),
+    axis.line.y = element_line(size = 0.4),
+    axis.title.y = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 10, color = "#f20707", face = "bold"),
+    plot.subtitle = element_text(size = 9, color = "grey30")
+  ) +
+  scale_x_continuous(
+    expand = c(0, 0, 0.01, 0.01),
+    breaks = seq(25, 100, 25)
+  ) +
+  labs(
+    title = "Yours, Lenin",
+    subtitle = "Lenin's favourite ways to sign a letter\n",
+    x = "number of letters"
+  )
+  
+```
+It's interesting that "Salut, Lenin" made it into the top 5. Russia and France
+had close political ties, and in the 18th and 19th century it was fashionable
+for the nobility to converse in French. The class-based language barriers and
+trendy use of French feature in Tolstoy's *Anna Karenina* and Chernychevsky's
+*What is to be Done?*. Lenin also discusses it in his 
+[essay on linguistics](https://www.marxists.org/reference/archive/stalin/works/1950/jun/20.htm):
+
+> There was a time when Russian aristocrats at the tsar's court and in high
+society also made a fad of the French language. They prided themselves on the
+fact that when they spoke Russian they often lapsed into French, that they could
+only speak Russian with a French accent. Does this mean that there was no
+Russian language common to the whole people at that time in Russia, that a
+language common to the whole people was a fiction, and "class languages" a
+reality?
