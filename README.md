@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-<div class="floatting">
+<div class="floating">
 
 <img src="man/figures/leninsticker_tiny.png" width="150" style="float:right; padding:10px" />
 
