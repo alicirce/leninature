@@ -118,10 +118,30 @@ lenin <- bind_rows(all_pages) %>%
 lenin <- lenin %>%
   mutate(
     title = case_when(
-      grepl("/cons-logic/", url) ~
-        "Conspectus of Hegel’s book 'The Science of Logic'",
       grepl("/witbd/", url) ~
         "What is to be Done?",
+      grepl("/staterev/", url) ~
+        "The State and Revolution",
+      grepl("/lwc/", url) ~
+        "'Left-Wing' Communism: an Infantile Disorder",
+      grepl("/miliprog/", url) ~
+        "The Military Programme of the Proletarian Revolution",
+      grepl("/cons-logic/", url) ~
+        "Conspectus of Hegel’s book 'The Science of Logic'",
+      grepl("/holy-fam/", url) ~
+        "Conspectus of the Book 'The Holy Family' by Marx and Engels",
+      grepl("/ess-religion/", url) ~
+        "Conspectus of Feuerbach’s Book 'Lectures on the Essence of Religions'",
+      grepl("/7thcong/", url) ~
+        "Extraordinary Seventh Congress of the R.C.P.(B.)",
+      grepl("/rcp8th/", url) ~
+        "Eighth Congress of the R.C.P.(B.)",
+      grepl("/8thcong/", url) ~
+        "Eighth All-Russia Congress of Soviets",
+      grepl("/10thcong/", url) ~
+        "Tenth Congress of the R.C.P.(B.)",
+      grepl("/prrk/", url) ~
+        "The Proletarian Revolution and the Renegade Kautsky",
       grepl("/ni-eta/", url) ~
         "Notebook 'η'",
       grepl("/ni-zeta/", url) ~
