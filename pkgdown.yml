@@ -3,5 +3,6 @@ pkgdown: 2.0.5
 pkgdown_sha: ~
 articles:
   leninature: leninature.html
-last_built: 2022-06-25T06:24Z
+  mentions: mentions.html
+last_built: 2022-06-27T00:53Z
 
