@@ -1,0 +1,364 @@
+---
+title: "Mentions of Mencheviks"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Mentions of Mencheviks}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  echo = FALSE,
+  fig.align = "center"
+)
+```
+
+```{css}
+img {
+  border: 0px;
+}
+p.caption {
+  font-size: 0.8em;
+}
+```
+
+```{r setup}
+library(leninature)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+A lot of Lenin's writing takes the form of arguments against political or
+philosophical opponents. In [*The Proletarian Revolution and the Renegade Kautsky*](https://www.marxists.org/archive/lenin/works/1918/prrk/) (1918), Lenin 
+argues against Social Democrat Kautsky about the role of democracy and revolution 
+in  the transition to socialism. 
+In [*The Economic Content of Narodism and the Criticism of it in Mr. Struve’s Book*](https://www.marxists.org/archive/lenin/works/1894/narodniks/index.htm),
+dissects Peter Struve's 1894 book, accusing it of being a liberal bourgeois 
+distortion of Marxism. I wondered who was most frequently mentioned in Lenin's
+works. (See a 
+[similar analysis](https://alicirce.github.io/marxmywords/articles/capital_footnotes.html#citation-content) 
+I did for Marx's *Capital*)
+
+## Methods
+
+I used {spacyr}'s parsing tools to tag parts of speech. This tool uses sentence
+syntax structure to identify what words are verbs, nouns, adjectives, etc. I
+then looked for the most common words (or series of words) tagged as proper
+nouns. I manually classified the top hits as being associated with people,
+political parties, government institutions, or newspapers.
+
+```{r}
+
+# The most frequently occurring proper nouns with at least 160 instances,
+# manually grouped according to type of pronoun. This list excludes things
+# labelled as proper nouns related to places (eg, Moscow) or titles (eg, Mr), 
+# and roughly corresponds to the top ~270 proper nouns.
+top_proper_nouns <- select_proper_nouns <- list(
+  people = c(
+    "Marx", "Engels", "Kautsky", "Trotsky", "Kerensky", "Mach", "Martov",
+    "Sismondi", "Struve", "Kolchak", "Maslov", "Potresov", "Axelrod", 
+    "Bogdanov", "Stolypin", "Milyukov", "Denikin", "Avenarius", "Bulgakov",
+    "Chkheidze", "Martynov", "Hegel", "Larin", "Radek", "Bernstein",
+    "Rosa Luxemburg", "Mikhailovsky", "Kant", "Chernov", "Kamenev", "Bebel",
+    "Tsereteli", "Grimm", "Stalin", "Liebknecht", "Guchkov", "Nadya", "Parvus",
+    "Zinoviev", "Kornilov"
+  ),
+  government = c(
+    "Central Committee", "C.C.", "Zemstvo", "Soviets", "Constituent Assembly",
+    "Duma", "Commissariat", "Central Organ", "Soviet", "Red Army", 
+    "Politbureau", "Provisional Government"
+  ),
+  parties = c(
+    "Bolsheviks", "Menshevik", "Narodniks", "Mensheviks", "Narodnik", 
+    "Bolshevik", "Trudoviks", "Trudovik", "R.S.D.L.P.", "Marxists", "Marxist",
+    "Communists", "Octobrists", "Democratic Labour Party", "Black Hundreds",
+    "Cadets", "Bund", "Bundists", "Narodism", "Bolshevism", "Menshevism",
+    "Socialists"
+  ),
+  newspapers = c(
+    "Iskra", "Pravda", "Vperyod", "Rech", "Rabocheye Dyelo", "Nasha Zarya",
+    "Osvobozhdeniye", "Novoye Vremya", "Russkoye Bogatstvo", "Proletary"
+  )
+)
+
+# I've retrospectively limited the vectors of key words to most common ones when
+# assessed by total mentions (instead of restricting counts to those instances
+# recognized by Spacyr's parts-of-speech tagging) so that this vignette builds a
+# little faster, but you can verify for yourself.
+
+#newspapers <- count_lenin_mentions(top_proper_nouns$newspapers[1:9])
+people <- count_lenin_mentions(top_proper_nouns$people[1:15])
+
+
+# parties is a little harder because it's sometimes in plural, sometimes not.
+# I considered using word stems instead, but that doesn't work so well when 
+# the party name is multiple words. This is a little bit of a hacky solution
+# but I think it's a reasonable way to compare mentions within the parties.
+
+# lenin_with_adjustments <- lenin %>%
+#   mutate(
+#     text = gsub("\\bbolshevik\\b", "Bolsheviks", text, ignore.case = T),
+#     text = gsub("\\bbolshevism\\b", "Bolsheviks", text, ignore.case = T),
+#     text = gsub("\\bmenshevik\\b", "Mensheviks", text, ignore.case = T),
+#     text = gsub("\\bmenshevism\\b", "Mensheviks", text, ignore.case = T),
+#     text = gsub("\\bnarodnik\\b", "Narodniks", text, ignore.case = T),
+#     text = gsub("\\bnarodism\\b", "Narodniks", text, ignore.case = T),
+#     text = gsub("\\btrudovik\\b", "Trudoviks", text, ignore.case = T),
+#     text = gsub("\\btrudovism\\b", "Trudoviks", text, ignore.case = T),
+#     text = gsub("R.S.D.L.P.", "Social-Democrats", text, ignore.case = T),
+#     text = gsub("RSDLP", "Social-Democrats", text, ignore.case = T),
+#     text = gsub(
+#       "Socialist-Revolution", 
+#       "Socialist-Revolutionaries", 
+#       text, 
+#       ignore.case = T
+#     ),
+#     text = gsub(
+#       "\\bSocialist Revolutionaries\\b", 
+#       "Socialist-Revolutionaries",
+#       text, 
+#       ignore.case = T
+#     ),
+#     text = gsub("Social-Democracy", "Social-Democrats", text, ignore.case = T),
+#     text = gsub(
+#       "Social-Democratic\\b", 
+#       "Social-Democrats", 
+#       text, 
+#       ignore.case = T
+#     ),
+#     text = gsub(
+#       "\\bSocial Democrats\\b",
+#        "Social-Democrats",
+#        text,
+#        ignore.case = T
+#     )
+#   )
+
+# parties <- leninature:::count_mentions_in_dataframe(
+#   c(
+#     "Bolsheviks", "Mensheviks", "Narodniks", 
+#     "Trudoviks", 
+#     #"RSDLP", 
+#     "Social-Democrats"
+#   ),
+#   lenin_with_adjustments
+# )
+
+```
+
+## People
+
+Unsurprisingly, Marx makes it to the top of the list, with Engels not too far
+behind. Lenin's wife, Krupskaya, relates the following anecdote in her
+[essay on how Marx shaped Lenin's thinking](https://www.marxists.org/archive/krupskaya/works/howleninstudiedmarx.htm):
+
+> For Lenin the teachings of Marx were a guide to action. He once used the
+following expression: "Who wants to consult with Marx ? " . . . It is a very
+characteristic expression. He himself constantly "consulted with Marx."
+
+```{r fig.width=4, fig.height=3}
+top_n <- people %>%
+  group_by(word) %>% 
+  summarize(n = sum(mentions)) %>%
+  arrange(desc(n)) %>%
+  slice(1:9)
+
+top_n %>%
+  ggplot() +
+  aes(x = n, y = reorder(word, n)) +
+  geom_point() +
+  geom_segment(aes(xend = 0, yend = word)) +
+  geom_label(
+    aes(x = 0, label = word),
+    fill = "white",
+    label.size = NA,
+    label.padding = unit(0, "cm"),
+    hjust = 0,
+    nudge_x = 80,
+    size = 3.2
+  ) +
+  theme_classic() +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.ticks.x = element_line(color = "black"),
+    axis.line.y = element_line(size = 0.4),
+    axis.title.y = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 10, color = "#f20707", face = "bold"),
+    plot.subtitle = element_text(size = 9, color = "grey30")
+  ) +
+  scale_x_continuous(
+    expand = c(0, 0, 0.01, 0.01)
+  ) +
+  labs(
+    title = "Lenin: friends and foes",
+    subtitle = "Number of mentions across all Lenin's works (1893-1923)",
+    x = "number of mentions"
+  )
+
+```
+
+Kautsky, as I mentioned above, was a Social Democrat and opponent of Bolshevism, 
+and the target of many works by Lenin. Martov led the Mensheviks, the faction of
+the Russian Social Democratic Labour Party (RSDLP) that opposed the Bolsheviks
+during the 2nd Party Congress in 1903. Trotsky was a sometimes-opponent and 
+[sometimes-supporter](https://redsails.org/trotsky-on-state-capitalism/) of 
+Lenin. Struve was a prominent member of the RSDLP, but became more liberal in
+his politics over time and opposed Lenin's Bolsheviks. Stolypin was the prime
+minister of Russia from 1906-1911. Axelrod was an editor (along with Lenin) of
+the newspaper *Iskra*, and a member of the Menshevik faction. Mach was a
+scientist (of Mach number fame) and a philosopher.
+
+We can also look at how these people were mentioned across Lenin's writing.
+
+```{r fig.width=6, fig.height=4.5}
+
+
+people_graph_df <- people %>%
+  mutate(person = as.character(word)) %>%
+  filter(person %in% top_n$word) %>%
+  group_by(year, person) %>%
+  summarize(n = sum(mentions))  %>%
+  ungroup() %>%
+  group_by(person) %>%
+  mutate(tot = sum(n)) %>%
+  ungroup() %>%
+  mutate(person = reorder(person, desc(n)))
+
+# separate
+people_graph_df  %>%
+  ggplot() +
+  aes(x = year, y = n) +
+  geom_hline(yintercept = 0, color = "grey40") +
+  geom_bar( 
+    stat = "identity",
+    fill = "grey60",
+    width = 0.4
+  ) +
+  geom_text(
+    data = select(people_graph_df, person) %>% distinct(), 
+    aes(label = person, x = 1922, y = 650), 
+    hjust = 1, size = 3.5
+  ) +
+  theme_void() +
+  facet_wrap(~person, scales = "free_x") +
+  theme(
+    legend.position = 'none',
+    strip.background = element_blank(),
+    axis.text = element_text(color = 'grey30', size = 8),
+    axis.ticks.x = element_line(color = "grey60"),
+    axis.ticks.length = unit(0.1, units = "in"),
+    panel.grid.major.y = element_line(color = "grey90"),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 10, color = "#f20707", face = "bold"),
+    plot.subtitle = element_text(size = 9, color = "grey30"),
+    strip.text = element_blank()
+  ) +
+  labs(
+    title = "Lenin: friends and foes",
+    subtitle = "Frequently mentioned people (name drops per year)"
+  ) +
+  scale_y_continuous(expand = c(0.0, 0., 0.1, 0.1)) +
+  scale_x_continuous(breaks = seq(1895, 1920, 5))
+
+
+```
+
+Perhaps the most unique pattern is that of Mach; 519 of the total 544 mentions
+of Mach were in [*Materialism and Empirio-Criticism*](https://www.marxists.org/archive/lenin/works/1908/mec/index.htm),
+(1908) Lenin's [longest work](https://alicirce.github.io/leninature/articles/leninature.html#books), 
+in which Lenin argues against Mach's claims that no knowledge exists outside of
+one's own senses and experience. The mentions of Struve, Stolypin, Struve 
+correspond with the timelines of their political prominence. Marx features
+fairly consistently throughout Lenin's work. Kautsky and Engels also span the
+whole timeline of Lenin's writing but with a few sharp peaks. The sharp spike in
+Engel's timeline in the graph represents *Materialism and Empirio-Criticism*
+(409 out of 1674 mentions). The two tallest peaks for Kautsky are the 
+aforementioned [*The Proletarian Revolution and the Renegade Kautsky*](https://www.marxists.org/archive/lenin/works/1918/prrk/) and the 1899
+pair of articles titled 
+[*Capitalism in Agriculture*](https://www.marxists.org/archive/lenin/works/1899/agriculture/).
+
+
+
+```{r eval=FALSE}
+
+party_graph_df <- parties %>%
+  mutate(party = gsub("-", "\n", as.character(word))) %>%
+  group_by(year, party) %>%
+  summarize(n = sum(mentions))  %>%
+  ungroup() %>%
+  group_by(party) %>%
+  mutate(tot = sum(n)) %>%
+  ungroup() %>%
+  mutate(party = reorder(party, desc(tot)))
+
+
+party_graph_df  %>%
+  ggplot() +
+  aes(x = year, y = n) +
+  geom_hline(yintercept = 0, color = "grey40") +
+  geom_bar( 
+    stat = "identity",
+    #fill = "grey60",
+    aes(fill = year == 1917),
+    width = 0.5
+  ) +
+  geom_text(
+    data = select(party_graph_df, party) %>% distinct(), 
+    aes(label = party, x = 1922, y = 1200), 
+    hjust = 1, size = 3.3
+  ) +
+  theme_void() +
+  facet_wrap(~party, scales = "free_x") +
+  theme(
+    legend.position = 'none',
+    strip.background = element_blank(),
+    axis.text = element_text(color = 'grey30', size = 8),
+    axis.ticks.x = element_line(color = "grey60"),
+    axis.ticks.length = unit(0.1, units = "in"),
+    panel.grid.major.y = element_line(color = "grey90"),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 10, color = "#f20707", face = "bold"),
+    plot.subtitle = element_text(size = 9, color = "grey30"),
+    plot.caption = element_text(size = 7, color = "grey30"),
+    strip.text = element_blank()
+  ) +
+  labs(
+    title = "Lenin & the rise and fall of political parties",
+    subtitle = "Number of mentions of select political parties",
+    caption = "Red bar: 1917 February/October Revolutions.\nIncludes synonyms (e.g., Bolshevism)."
+  ) +
+  scale_y_continuous(expand = c(0.0, 0., 0.1, 0.1)) +
+  scale_x_continuous(breaks = seq(1895, 1920, 5)) +
+  scale_fill_manual(
+    values = c("grey60", "#f75d6f")
+  )
+
+
+```
+```{r eval=FALSE}
+parties %>%
+  group_by(title, word) %>%
+  summarize(n = sum(mentions))%>%
+  arrange(desc(n))
+
+parties %>%
+  mutate(abbrev = gsub(".*[0-9]/(.*)/.*", "\\1", url)) %>%
+  filter(!abbrev %in% tolower(month.abb)) %>%
+  group_by(abbrev, word) %>%
+  summarize(n = sum(mentions))%>%
+  arrange(desc(n))
+
+people %>%
+  mutate(abbrev = gsub(".*[0-9]/(.*)/.*", "\\1", url)) %>%
+  filter(!abbrev %in% tolower(month.abb)) %>%
+  group_by(abbrev, word, title) %>%
+  summarize(n = sum(mentions))%>%
+  arrange(desc(n))
+```
