@@ -2,7 +2,7 @@ Package: leninature
 Title: Provides the works of Lenin in an analysis-ready format
 Version: 0.0.0.1
 Authors@R: 
-    person("Circe", "Malone", ,"circemalone@gmail.com", role = c("aut", "cre"))
+    person("Alice Circe", "Malone", ,"circemalone@gmail.com", role = c("aut", "cre"))
 Description: This package contains all of Lenin's works available on the 
     Marxists Internet Archive (marxists.org) in the form of a tidy data frame.
 License: MIT + file LICENSE

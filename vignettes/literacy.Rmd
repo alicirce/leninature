@@ -1,0 +1,141 @@
+---
+title: "Literacy"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{literacy}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  echo = FALSE,
+  fig.align = "center"
+)
+```
+
+```{css}
+img {
+  border: 0px;
+}
+p.caption {
+  font-size: 0.8em;
+}
+```
+
+```{r setup}
+library(leninature)
+library(dplyr)
+library(ggplot2)
+```
+
+> As regards the second enemy, illiteracy, I can say that so long as there is
+such a thing as illiteracy in our country it is too much to talk about political
+education. This is not a political problem; it is a condition without which it
+is useless talking about politics. An illiterate person stands outside politics,
+he must first learn his ABC. Without that there can be no politics; without that
+there are rumours, gossip, fairy-tales and prejudices, but not politics.
+- [Lenin (1921)](https://www.marxists.org/archive/lenin/works/1921/oct/17.htm)
+
+Socialist governments tend to radically increase literacy rates. In a little 
+over a year, [Cuba raised literacy rates from 47% to 100%](https://daily.jstor.org/rosa-hernandez-acosta-on-the-cuban-literacy-campaign/).
+China raised literacy from [20% in 1950 to more than 85% in 2001](nytimes.com/2001/02/12/news/chinas-long-but-uneven-march-to-literacy.html).
+Lenin's administration similarly viewed it as a top priority, naming illiteracy
+as one of three enemies in his 1921 address on the New Economic Policy.
+
+However, revolutionary efforts to improve literacy not only predate these socialist
+revolutions, but paved their way. Bolsheviks and other revolutionary parties
+realized that one of the primary barriers to raising the political consciousness
+of the workers was their illiteracy. In 1897, only about 
+[1 in 3 men and 1 in 10 women](https://www.marxists.org/archive/lenin/works/1897/handicraft/2iv.htm)
+were literate. [In 1913](https://www.marxists.org/archive/lenin/works/1913/apr/27c.htm), 
+Lenin referred to the literacy rate of 27% as "stultifying" the people.
+Revolutionaries  (including Krupskaya) taught in 
+[Sunday schools](https://twitter.com/alicirce/status/1553175614093266944?s=20&t=A0KnlZurDZUJpUVPjQWU0Q), 
+geared towards workers on their days off, and these venues became places for
+raising literacy rates as well as political consciousness. 
+
+You can see this consistent emphasis on literacy in Lenin's writing throughout
+the years, both before the 1917 October Revolution, as part of political
+education of the working class, and after the revolution, as the governing
+party.
+
+```{r fig.height=3,fig.width=4}
+lenin_literacy <- lenin %>%
+  filter(grepl("literacy|literate", text, ignore.case = T)) %>%
+  leninature:::count_mentions_in_dataframe(
+    words = c(
+      "literacy", "illiteracy", 
+      "illiterate", "literate",
+      "illiterates", "literates"
+    )
+  ) 
+
+lit_by_year <- lenin_literacy %>%
+  mutate(word = ifelse(
+    grepl("illit", word),
+    "illiterate/illiteracy",
+    "literate/literacy"
+  )) %>%
+  group_by(word, year) %>%
+  summarize(n = sum(mentions))
+
+lit_by_year %>%
+  ggplot() +
+  aes(x = year, y = n) +
+  geom_hline(yintercept = 0, color = "grey40") +
+  geom_bar( 
+    stat = "identity",
+    #fill = "grey60",
+    aes(fill = word),
+    width = 0.5
+  ) +
+  theme_void() +
+  theme(
+    legend.position = 'bottom',
+    legend.key.height = unit(0.2, "pt"),
+    legend.title = element_blank(),
+    strip.background = element_blank(),
+    axis.text = element_text(color = 'grey30', size = 8),
+    axis.ticks.x = element_line(color = "grey60"),
+    axis.ticks.length = unit(0.1, units = "in"),
+    panel.grid.major.y = element_line(color = "grey90"),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 10, color = "#f20707", face = "bold"),
+    plot.subtitle = element_text(size = 9, color = "grey30"),
+    plot.caption = element_text(size = 7, color = "grey30"),
+    strip.text = element_blank()
+  ) +
+  labs(
+    title = "Lenin & literacy",
+    subtitle = "Number of mentions of literacy/illiteracy"
+  ) +
+  scale_y_continuous(expand = c(0.0, 0., 0.2, 0.2)) +
+  scale_x_continuous(breaks = seq(1895, 1920, 5)) +
+  scale_fill_manual(
+    values = c("grey60", "grey40")
+  )
+```
+
+What were they reading in these literacy groups and reading circles?
+Chernychevsky's *What is to be done?*! One such participant, who later joined
+the Bolshevik party and participated in the 1917 Revolution reflected:
+
+> When we started to attend the Sunday and evening schools, we began to make use
+of books from the library and we learned of the great Russian democrat,
+Chernychevsky. We read his book *What is to be done?*, secretly, and found the
+image of Vera Pavolovna, the woman of the future, very attractive
+- Alexandra Artiukhina, [quoted in Midwives of the Revolution](https://www.taylorfrancis.com/books/mono/10.4324/9780203981603/midwives-revolution-jane-mcdermid-anna-hillyar)
+
+
+## Why is this important today?
+
+If the argument against encouraging people sympathetic to socialist movements to
+read or critically engage with socialist texts is that literacy in the general
+public is too low (eg., 54% of the US adult population reading
+[below a 6th grade level](https://www.forbes.com/sites/michaeltnietzel/2020/09/09/low-literacy-levels-among-us-adults-could-be-costing-the-economy-22-trillion-a-year/?sh=303aa1944c90)) then the 
+solution is to improve literacy, and help people to learn and understand, not
+reduce movement beliefs to bite-size slogans.
