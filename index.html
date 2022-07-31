@@ -66,6 +66,7 @@
 <div class="page-header"><h1 id="leninature-">leninature <img src="reference/figures/leninsticker_tiny.png" align="right"><a class="anchor" aria-label="anchor" href="#leninature-"></a>
 </h1></div>
 <!-- badges: start --><!-- badges: end --><p>The goal of this package is to make it easy to query and analyse the works of Lenin.</p>
+<p>If you would prefer to work with Lenin’s work in their original Russian, please see <a href="https://github.com/alicirce/leninism" class="external-link">leninism</a>. These databases are not fully comparable; some documents may be present in one and not in the other.</p>
 </div>
 <div class="section level1">
 <h1 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
@@ -76,22 +77,44 @@
 <p>If you would like to use the tidy data in the format provided, simply install this package from github using devtools:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"alicirce/leninature"</span><span class="op">)</span></span></code></pre></div>
+<p>Then, simply load the package and play around with the available data frame, <code>leninru</code></p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">leninature</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">lenin</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>text <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substring</a></span><span class="op">(</span><span class="va">text</span>, <span class="fl">1</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span> <span class="co"># for nicer README printing</span></span>
+<span><span class="co">#&gt;                        url              title text_annotation</span></span>
+<span><span class="co">#&gt; 1 works/1893/dec/00ppm.htm To:   P. P. Maslov            &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2 works/1893/dec/00ppm.htm To:   P. P. Maslov            &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3 works/1893/dec/00ppm.htm To:   P. P. Maslov            &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4 works/1893/dec/00ppm.htm To:   P. P. Maslov            &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5 works/1893/dec/00ppm.htm To:   P. P. Maslov            &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6 works/1893/dec/00ppm.htm To:   P. P. Maslov            &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;                             text year</span></span>
+<span><span class="co">#&gt; 1  I received your letter the da 1893</span></span>
+<span><span class="co">#&gt; 2  I am very sorry you did not f 1893</span></span>
+<span><span class="co">#&gt; 3  I am expecting from you a cri 1893</span></span>
+<span><span class="co">#&gt; 4  I offered the article to Russ 1893</span></span>
+<span><span class="co">#&gt; 5  It would be very interesting  1893</span></span>
+<span><span class="co">#&gt; 6  The basic premise in my comme 1893</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="from-scratch">From Scratch<a class="anchor" aria-label="anchor" href="#from-scratch"></a>
 </h2>
 <p>If you would like to run the data compilation scripts yourself from scratch, you will need to download the texts from the Marxists Internet Archive (MIA). MIA provides instructions for (respectfully) downloading portions of their archives in their <a href="https://www.marxists.org/admin/janitor/faq.htm#hdd" class="external-link">FAQ</a>.</p>
 <p>The scripts in <code>data-raw</code> assume you have already run the following commands. You will also need to have your working directory appropriately set.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">mkdir</span> lenin</span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="bu">cd</span> lenin</span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="fu">wget</span> -mpnp -nH -N -t 3 -w .5 https://www.marxists.org/archive/lenin/by-title.htm</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">mkdir</span> lenin</span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="bu">cd</span> lenin</span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="fu">wget</span> -mpnp -nH -N -t 3 -w .5 https://www.marxists.org/archive/lenin/by-title.htm</span></code></pre></div>
 <p>This took me about 2.5 hours to pull, but others have reported it taking substantially longer. If your command is interrupted, you can restart it again.</p>
 </div>
 <div class="section level2">
 <h2 id="i-dont-want-to-use-r">I don’t want to use R<a class="anchor" aria-label="anchor" href="#i-dont-want-to-use-r"></a>
 </h2>
 <p>If you’d like the tidied data available in this package, but would prefer to use another language to perform your analysis, assuming you have R installed and you’ve downloaded this package from github using the code above, you can run the following lines to export the data as a text file:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">leninature</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">lenin</span>, <span class="st">"lenin.csv"</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </div>
