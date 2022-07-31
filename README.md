@@ -9,6 +9,11 @@
 The goal of this package is to make it easy to query and analyse the
 works of Lenin.
 
+If you would prefer to work with Lenin’s work in their original Russian,
+please see [leninism](https://github.com/alicirce/leninism). These
+databases are not fully comparable; some documents may be present in one
+and not in the other.
+
 # Getting started
 
 ## The Easy Way
@@ -18,6 +23,32 @@ install this package from github using devtools:
 
 ``` r
 devtools::install_github("alicirce/leninature")
+```
+
+Then, simply load the package and play around with the available data
+frame, `leninru`
+
+``` r
+library(leninature)
+library(dplyr, warn.conflicts = FALSE)
+
+lenin %>%
+  head() %>%
+  mutate(text = substring(text, 1, 30)) # for nicer README printing
+#>                        url              title text_annotation
+#> 1 works/1893/dec/00ppm.htm To:   P. P. Maslov            <NA>
+#> 2 works/1893/dec/00ppm.htm To:   P. P. Maslov            <NA>
+#> 3 works/1893/dec/00ppm.htm To:   P. P. Maslov            <NA>
+#> 4 works/1893/dec/00ppm.htm To:   P. P. Maslov            <NA>
+#> 5 works/1893/dec/00ppm.htm To:   P. P. Maslov            <NA>
+#> 6 works/1893/dec/00ppm.htm To:   P. P. Maslov            <NA>
+#>                             text year
+#> 1  I received your letter the da 1893
+#> 2  I am very sorry you did not f 1893
+#> 3  I am expecting from you a cri 1893
+#> 4  I offered the article to Russ 1893
+#> 5  It would be very interesting  1893
+#> 6  The basic premise in my comme 1893
 ```
 
 ## From Scratch

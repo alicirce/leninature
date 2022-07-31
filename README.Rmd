@@ -19,6 +19,10 @@ knitr::opts_chunk$set(
 The goal of this package is to make it easy to query and analyse the
 works of Lenin. 
 
+If you would prefer to work with Lenin’s work in their original Russian, please
+see [leninism](https://github.com/alicirce/leninism). These databases are not
+fully comparable; some documents may be present in one and not in the other.
+
 # Getting started
 
 ## The Easy Way
@@ -27,6 +31,17 @@ this package from github using devtools:
 
 ```{r eval=FALSE}
 devtools::install_github("alicirce/leninature")
+```
+
+Then, simply load the package and play around with the available data frame, 
+`leninru`
+```{r example}
+library(leninature)
+library(dplyr, warn.conflicts = FALSE)
+
+lenin %>%
+  head() %>%
+  mutate(text = substring(text, 1, 30)) # for nicer README printing
 ```
 
 ## From Scratch
