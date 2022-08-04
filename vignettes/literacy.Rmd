@@ -30,6 +30,7 @@ p.caption {
 library(leninature)
 library(dplyr)
 library(ggplot2)
+library(ggtextcounts)
 ```
 
 > As regards the second enemy, illiteracy, I can say that so long as there is
@@ -66,7 +67,7 @@ party.
 ```{r fig.height=3,fig.width=4}
 lenin_literacy <- lenin %>%
   filter(grepl("literacy|literate", text, ignore.case = T)) %>%
-  leninature:::count_mentions_in_dataframe(
+  ggtextcounts::count_mentions_in_dataframe(
     words = c(
       "literacy", "illiteracy", 
       "illiterate", "literate",

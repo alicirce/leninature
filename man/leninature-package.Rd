@@ -9,7 +9,7 @@
 This package contains all of Lenin's works available on the Marxists Internet Archive (marxists.org) in the form of a tidy data frame.
 }
 \author{
-\strong{Maintainer}: Circe Malone \email{circemalone@gmail.com}
+\strong{Maintainer}: Alice Circe Malone \email{circemalone@gmail.com}
 
 }
 \keyword{internal}

@@ -4,12 +4,23 @@
 \alias{count_lenin_mentions}
 \title{Count mentions of key words in Lenin's work}
 \usage{
-count_lenin_mentions(words, ignore_case = TRUE)
+count_lenin_mentions(
+  words,
+  ignore_case = TRUE,
+  word_boundaries = TRUE,
+  return_all_rows = FALSE
+)
 }
 \arguments{
 \item{words}{vector of key words to search for}
 
 \item{ignore_case}{logical, should case sensitivity be considered?}
+
+\item{word_boundaries}{logical, should word boundaries be considered?}
+
+\item{return_all_rows}{logical, return all rows, or only rows with 1+
+instance? It's considerably faster to only return rows with 1+ instance for
+large data frames and/or infrequent words.}
 }
 \value{
 Returns the lenin data frame with two new columns added:
@@ -17,7 +28,9 @@ Returns the lenin data frame with two new columns added:
 \item{mentions}{number of occurrences of the key word in the \code{text} column}
 \item{word}{key word}
 }
-The data frame will be in "long" format, with a new row for each key word.
+The data frame will be in "long" format, with a new row for each key word. If
+\code{return_all_rows} is set to \code{FALSE} only rows with at least one mention for
+one of the words
 }
 \description{
 Counts how often a key word occurs in Lenin's work. Considers word

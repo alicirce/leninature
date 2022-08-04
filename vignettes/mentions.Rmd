@@ -92,7 +92,7 @@ top_proper_nouns <- select_proper_nouns <- list(
 # little faster, but you can verify for yourself.
 
 #newspapers <- count_lenin_mentions(top_proper_nouns$newspapers[1:9])
-people <- count_lenin_mentions(top_proper_nouns$people[1:15])
+people <- count_lenin_mentions(words = top_proper_nouns$people[1:15])
 
 
 # parties is a little harder because it's sometimes in plural, sometimes not.
@@ -100,54 +100,54 @@ people <- count_lenin_mentions(top_proper_nouns$people[1:15])
 # the party name is multiple words. This is a little bit of a hacky solution
 # but I think it's a reasonable way to compare mentions within the parties.
 
-# lenin_with_adjustments <- lenin %>%
-#   mutate(
-#     text = gsub("\\bbolshevik\\b", "Bolsheviks", text, ignore.case = T),
-#     text = gsub("\\bbolshevism\\b", "Bolsheviks", text, ignore.case = T),
-#     text = gsub("\\bmenshevik\\b", "Mensheviks", text, ignore.case = T),
-#     text = gsub("\\bmenshevism\\b", "Mensheviks", text, ignore.case = T),
-#     text = gsub("\\bnarodnik\\b", "Narodniks", text, ignore.case = T),
-#     text = gsub("\\bnarodism\\b", "Narodniks", text, ignore.case = T),
-#     text = gsub("\\btrudovik\\b", "Trudoviks", text, ignore.case = T),
-#     text = gsub("\\btrudovism\\b", "Trudoviks", text, ignore.case = T),
-#     text = gsub("R.S.D.L.P.", "Social-Democrats", text, ignore.case = T),
-#     text = gsub("RSDLP", "Social-Democrats", text, ignore.case = T),
-#     text = gsub(
-#       "Socialist-Revolution", 
-#       "Socialist-Revolutionaries", 
-#       text, 
-#       ignore.case = T
-#     ),
-#     text = gsub(
-#       "\\bSocialist Revolutionaries\\b", 
-#       "Socialist-Revolutionaries",
-#       text, 
-#       ignore.case = T
-#     ),
-#     text = gsub("Social-Democracy", "Social-Democrats", text, ignore.case = T),
-#     text = gsub(
-#       "Social-Democratic\\b", 
-#       "Social-Democrats", 
-#       text, 
-#       ignore.case = T
-#     ),
-#     text = gsub(
-#       "\\bSocial Democrats\\b",
-#        "Social-Democrats",
-#        text,
-#        ignore.case = T
-#     )
-#   )
+lenin_with_adjustments <- lenin %>%
+  mutate(
+    text = gsub("\\bbolshevik\\b", "Bolsheviks", text, ignore.case = T),
+    text = gsub("\\bbolshevism\\b", "Bolsheviks", text, ignore.case = T),
+    text = gsub("\\bmenshevik\\b", "Mensheviks", text, ignore.case = T),
+    text = gsub("\\bmenshevism\\b", "Mensheviks", text, ignore.case = T),
+    text = gsub("\\bnarodnik\\b", "Narodniks", text, ignore.case = T),
+    text = gsub("\\bnarodism\\b", "Narodniks", text, ignore.case = T),
+    text = gsub("\\btrudovik\\b", "Trudoviks", text, ignore.case = T),
+    text = gsub("\\btrudovism\\b", "Trudoviks", text, ignore.case = T),
+    text = gsub("R.S.D.L.P.", "Social-Democrats", text, ignore.case = T),
+    text = gsub("RSDLP", "Social-Democrats", text, ignore.case = T),
+    text = gsub(
+      "Socialist-Revolution",
+      "Socialist-Revolutionaries",
+      text,
+      ignore.case = T
+    ),
+    text = gsub(
+      "\\bSocialist Revolutionaries\\b",
+      "Socialist-Revolutionaries",
+      text,
+      ignore.case = T
+    ),
+    text = gsub("Social-Democracy", "Social-Democrats", text, ignore.case = T),
+    text = gsub(
+      "Social-Democratic\\b",
+      "Social-Democrats",
+      text,
+      ignore.case = T
+    ),
+    text = gsub(
+      "\\bSocial Democrats\\b",
+       "Social-Democrats",
+       text,
+       ignore.case = T
+    )
+  )
 
-# parties <- leninature:::count_mentions_in_dataframe(
-#   c(
-#     "Bolsheviks", "Mensheviks", "Narodniks", 
-#     "Trudoviks", 
-#     #"RSDLP", 
-#     "Social-Democrats"
-#   ),
-#   lenin_with_adjustments
-# )
+parties <- ggtextcounts::count_mentions_in_dataframe(
+  dataframe = lenin_with_adjustments,
+  words = c(
+    "Bolsheviks", "Mensheviks", "Narodniks",
+    "Trudoviks",
+    #"RSDLP",
+    "Social-Democrats"
+  )
+)
 
 ```
 
@@ -284,9 +284,16 @@ aforementioned [*The Proletarian Revolution and the Renegade Kautsky*](https://w
 pair of articles titled 
 [*Capitalism in Agriculture*](https://www.marxists.org/archive/lenin/works/1899/agriculture/).
 
+## Political Parties
 
+```{r}
+kwords_a <- lenin %>%
+  mutate(nw = stringr::str_count(text, "\\S+")) %>%
+  group_by(year) %>%
+  summarize(annualwords = sum(nw)/1000)
+```
 
-```{r eval=FALSE}
+```{r fig.width=6, fig.height=4.5, eval = FALSE}
 
 party_graph_df <- parties %>%
   mutate(party = gsub("-", "\n", as.character(word))) %>%
@@ -296,13 +303,16 @@ party_graph_df <- parties %>%
   group_by(party) %>%
   mutate(tot = sum(n)) %>%
   ungroup() %>%
-  mutate(party = reorder(party, desc(tot)))
+  mutate(party = reorder(party, desc(tot))) %>%
+  left_join(kwords_a) %>%
+  mutate(na = n/annualwords)
 
 
 party_graph_df  %>%
   ggplot() +
   aes(x = year, y = n) +
   geom_hline(yintercept = 0, color = "grey40") +
+  geom_vline(xintercept = 1903, color = "grey70", linetype = 'dashed') +
   geom_bar( 
     stat = "identity",
     #fill = "grey60",
@@ -310,8 +320,8 @@ party_graph_df  %>%
     width = 0.5
   ) +
   geom_text(
-    data = select(party_graph_df, party) %>% distinct(), 
-    aes(label = party, x = 1922, y = 1200), 
+    data = select(party_graph_df, party) %>% distinct(),
+    aes(label = party, x = 1922, y = 1200),
     hjust = 1, size = 3.3
   ) +
   theme_void() +
@@ -332,9 +342,57 @@ party_graph_df  %>%
   labs(
     title = "Lenin & the rise and fall of political parties",
     subtitle = "Number of mentions of select political parties",
-    caption = "Red bar: 1917 February/October Revolutions.\nIncludes synonyms (e.g., Bolshevism)."
+    caption = "Red bar: 1917 February/October Revolutions.
+    Dashed line: RSDLP split into Bolshevik/Menshevik factions (1903).
+    Includes synonyms (e.g., Bolshevism).
+    "
   ) +
   scale_y_continuous(expand = c(0.0, 0., 0.1, 0.1)) +
+  scale_x_continuous(breaks = seq(1895, 1920, 5)) +
+  scale_fill_manual(
+    values = c("grey60", "#f75d6f")
+  )
+
+party_graph_df  %>%
+  ggplot() +
+  aes(x = year, y = na) +
+  geom_hline(yintercept = 0, color = "grey40") +
+  geom_vline(xintercept = 1903, color = "grey70", linetype = 'dashed') +
+  geom_bar( 
+    stat = "identity",
+    #fill = "grey60",
+    aes(fill = year == 1917),
+    width = 0.5
+  ) +
+  geom_text(
+    data = select(party_graph_df, party) %>% distinct(),
+    aes(label = party, x = 1922, y = 4.5),
+    hjust = 1, size = 3.3
+  ) +
+  theme_void() +
+  facet_wrap(~party, scales = "free_x") +
+  theme(
+    legend.position = 'none',
+    strip.background = element_blank(),
+    axis.text = element_text(color = 'grey30', size = 8),
+    axis.ticks.x = element_line(color = "grey60"),
+    axis.ticks.length = unit(0.1, units = "in"),
+    panel.grid.major.y = element_line(color = "grey90"),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 10, color = "#f20707", face = "bold"),
+    plot.subtitle = element_text(size = 9, color = "grey30"),
+    plot.caption = element_text(size = 7, color = "grey30"),
+    strip.text = element_blank()
+  ) +
+  labs(
+    title = "Lenin & the rise and fall of political parties",
+    subtitle = "Number of mentions of select political parties (per 1000 words)",
+    caption = "Red bar: 1917 February/October Revolutions.
+    Dashed line: RSDLP split into Bolshevik/Menshevik factions (1903).
+    Includes synonyms (e.g., Bolshevism).
+    "
+  ) +
+  scale_y_continuous(expand = c(0.0, 0., 0.2, 0.2), breaks = c(0:5)) +
   scale_x_continuous(breaks = seq(1895, 1920, 5)) +
   scale_fill_manual(
     values = c("grey60", "#f75d6f")
@@ -351,14 +409,9 @@ parties %>%
 parties %>%
   mutate(abbrev = gsub(".*[0-9]/(.*)/.*", "\\1", url)) %>%
   filter(!abbrev %in% tolower(month.abb)) %>%
-  group_by(abbrev, word) %>%
+  group_by(year, abbrev, word, title) %>%
   summarize(n = sum(mentions))%>%
   arrange(desc(n))
 
-people %>%
-  mutate(abbrev = gsub(".*[0-9]/(.*)/.*", "\\1", url)) %>%
-  filter(!abbrev %in% tolower(month.abb)) %>%
-  group_by(abbrev, word, title) %>%
-  summarize(n = sum(mentions))%>%
-  arrange(desc(n))
+
 ```
