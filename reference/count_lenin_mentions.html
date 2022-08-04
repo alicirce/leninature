@@ -55,7 +55,12 @@ boundaries, optionally considers letter case.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">count_lenin_mentions</span><span class="op">(</span><span class="va">words</span>, ignore_case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">count_lenin_mentions</span><span class="op">(</span></span>
+<span>  <span class="va">words</span>,</span>
+<span>  ignore_case <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  word_boundaries <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  return_all_rows <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -66,6 +71,16 @@ boundaries, optionally considers letter case.</p>
 
 <dt>ignore_case</dt>
 <dd><p>logical, should case sensitivity be considered?</p></dd>
+
+
+<dt>word_boundaries</dt>
+<dd><p>logical, should word boundaries be considered?</p></dd>
+
+
+<dt>return_all_rows</dt>
+<dd><p>logical, return all rows, or only rows with 1+
+instance? It's considerably faster to only return rows with 1+ instance for
+large data frames and/or infrequent words.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -79,7 +94,9 @@ boundaries, optionally considers letter case.</p>
 <dd><p>key word</p></dd>
 
 
-</dl><p>The data frame will be in "long" format, with a new row for each key word.</p>
+</dl><p>The data frame will be in "long" format, with a new row for each key word. If
+<code>return_all_rows</code> is set to <code>FALSE</code> only rows with at least one mention for
+one of the words</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
